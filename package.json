@@ -2,6 +2,7 @@
   "name": "vu-meters",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -31,6 +32,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build-demo": "react-scripts build; rimraf demo; move-file build demo",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -51,5 +53,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "move-file-cli": "^2.0.0",
+    "rimraf": "^3.0.2"
   }
 }
