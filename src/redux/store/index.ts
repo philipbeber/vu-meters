@@ -3,6 +3,7 @@ import { createStore, Store } from "redux";
 import rootReducer, { AppState } from "../reducers/rootReducer";
 import { devToolsEnhancer } from "redux-devtools-extension";
 import { AppActions } from "../actions";
+import { createCode } from "../../arduino";
 
 const version = "0.3";
 
@@ -39,6 +40,9 @@ function loadState() {
     if (serializedState) {
       const frozenState = JSON.parse(serializedState) as FrozenState;
       if (frozenState.version === version) {
+        const audio = frozenState.state.audio;
+        // Regenerate the code in case the logic changed
+        frozenState.state.audio.code = createCode(audio.sampleSets, audio.startPin);
         return frozenState.state;
       }
     }
