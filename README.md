@@ -1,4 +1,12 @@
-# Getting Started with Create React App
+# App to generate Arduino code to drive fake VU meters
+
+[![Build Status](https://travis-ci.com/philipbeber/vu-meters.svg)](https://travis-ci.com/philipbeber/vu-meters)
+
+
+Demo: <https://philipbeber.github.io/vu-meters/demo/>
+
+
+# Contributing
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
