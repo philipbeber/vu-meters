@@ -17,6 +17,9 @@ function writePin(set: SampleSet, pin: number) {
 }
 
 export function createCode(sampleSets: SampleSet[], startPin: number) {
+  if (!sampleSets.length) {
+    return "";
+  }
   const sampleCount = sampleSets[0].samples.length;
 
   const code = `

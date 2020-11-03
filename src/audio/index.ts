@@ -18,8 +18,10 @@ const sampleTime = 100; // how often (in ms) we output a sample
 const windowSize = 3; // how big the window is that we sample, compared to sampleTime
 
 const filterData = (audioBuffer: AudioBuffer, maxSamples: number) => {
+  console.log("Sample rate", audioBuffer.sampleRate);
   const rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
   const sampleCount = sampleTime / 1000 * audioBuffer.sampleRate;
+  console.log("Sample count", sampleCount);
   const windowCount = sampleCount * windowSize;
   if (rawData.length <= sampleCount) {
       return;
