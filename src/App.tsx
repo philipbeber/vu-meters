@@ -5,9 +5,6 @@ import {
   CircularProgress,
   Container,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
   TextField,
 } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
@@ -34,7 +31,7 @@ function App() {
 
   const handleLoadFromUrl = async () => {
     setLoading(true);
-    const samples = await visualizeAudioFromUrl(url, 300);
+    const samples = await visualizeAudioFromUrl(url, maxSamples);
     if (samples) {
       audioDispatch({ type: "LOAD_SAMPLES", samples });
     }
@@ -55,7 +52,7 @@ function App() {
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const buffer = await files[i].arrayBuffer();
-        const samples = await visualizeAudioFromFile(buffer, 300);
+        const samples = await visualizeAudioFromFile(buffer, maxSamples);
         if (samples) {
           audioDispatch({ type: "LOAD_SAMPLES", samples });
         }
