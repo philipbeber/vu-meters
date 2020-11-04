@@ -1,20 +1,17 @@
-import * as uuid from "short-uuid";
 import { createCode } from "../../arduino";
+import { SampleSet } from "../../model";
 import { AudioActions } from "../actions/audioActions";
-
-export interface SampleSet {
-  readonly samples: number[];
-  readonly id: string;
-}
 
 type AudioState = {
   sampleSets: SampleSet[];
   startPin: number;
+  sampleRate: number;
   code: string;
 };
 const initialState: AudioState = {
   sampleSets: [],
   startPin: 9,
+  sampleRate: 100,
   code: ""
 };
 const audioReducer = (
@@ -23,7 +20,7 @@ const audioReducer = (
 ): AudioState => {
   switch (action.type) {
     case "LOAD_SAMPLES": {
-      const sampleSets = [...state.sampleSets, { samples: action.samples, id: uuid.generate() }]
+      const sampleSets = [...state.sampleSets, action.sampleSet]
       return {
         ...state,
         sampleSets,
@@ -45,8 +42,25 @@ const audioReducer = (
         code: createCode(state.sampleSets, action.startPin),
       };
     }
+    case "CHANGE_SAMPLE_RATE": {
+      return {
+        ...state,
+        sampleRate: action.sampleRate
+      };
+    }
     default:
       return state;
   }
 };
 export default audioReducer;
+
+export function restoreFromFrozen(state: AudioState) {
+  const newState: AudioState = {
+    ...initialState,
+    ...state
+  }
+  return {
+    ...newState,
+    code: createCode(newState.sampleSets, newState.startPin)
+  }
+}

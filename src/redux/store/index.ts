@@ -3,9 +3,9 @@ import { createStore, Store } from "redux";
 import rootReducer, { AppState } from "../reducers/rootReducer";
 import { devToolsEnhancer } from "redux-devtools-extension";
 import { AppActions } from "../actions";
-import { createCode } from "../../arduino";
+import { restoreFromFrozen } from "../reducers/audioReducer";
 
-const version = "0.3";
+const version = "0.4";
 
 interface FrozenState {
   version: string;
@@ -42,7 +42,7 @@ function loadState() {
       if (frozenState.version === version) {
         const audio = frozenState.state.audio;
         // Regenerate the code in case the logic changed
-        frozenState.state.audio.code = createCode(audio.sampleSets, audio.startPin);
+        frozenState.state.audio = restoreFromFrozen(audio);
         return frozenState.state;
       }
     }

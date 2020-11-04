@@ -1,29 +1,33 @@
+import * as uuid from "short-uuid";
+import { SampleSet } from "../model";
+
 window.AudioContext =
   window.AudioContext || ((window as any).webkitAudioContext as AudioContext);
 
 const audioContext = new AudioContext();
 
-export const visualizeAudioFromUrl = (url: string, maxSamples: number) => {
+export const visualizeAudioFromUrl = (url: string, maxLength: number, sampleRate: number) => {
   return fetch(url)
     .then((response) => response.arrayBuffer())
-    .then((arrayBuffer) => visualizeAudioFromFile(arrayBuffer, maxSamples));
+    .then((arrayBuffer) => visualizeAudioFromFile(arrayBuffer, maxLength, sampleRate));
 };
 
-export const visualizeAudioFromFile = (arrayBuffer: ArrayBuffer, maxSamples: number) => {
+export const visualizeAudioFromFile = (arrayBuffer: ArrayBuffer, maxLength: number, sampleRate: number) => {
     return audioContext.decodeAudioData(arrayBuffer)
-      .then(audioBuffer => filterData(audioBuffer, maxSamples))
+      .then(audioBuffer => filterData(audioBuffer, maxLength, sampleRate))
 }
 
-const sampleTime = 100; // how often (in ms) we output a sample
-const windowSize = 3; // how big the window is that we sample, compared to sampleTime
+// const sampleTime = 10; // how often (in ms) we output a sample
+const windowSize = 1; // how big the window is that we sample, compared to sampleTime
 
-const filterData = (audioBuffer: AudioBuffer, maxSamples: number) => {
-  console.log("Sample rate", audioBuffer.sampleRate);
-  const rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
-  const sampleCount = sampleTime / 1000 * audioBuffer.sampleRate;
-  console.log("Sample count", sampleCount);
-  const windowCount = sampleCount * windowSize;
-  if (rawData.length <= sampleCount) {
+const filterData = (audioBuffer: AudioBuffer, maxLength: number, sampleRate: number): SampleSet | undefined => {
+  console.log("Input sample rate", audioBuffer.sampleRate);
+  const rawData = audioBuffer.getChannelData(0); // TODO: Use more than one channel
+  const frameCount = Math.floor(audioBuffer.sampleRate / sampleRate); // Number of frames in each sample
+  const maxSamples = Math.min(rawData.length / frameCount, maxLength * sampleRate);
+  console.log("Frame count", frameCount);
+  const windowCount = frameCount * windowSize;
+  if (rawData.length <= frameCount) {
       return;
   }
   let rollingSum = 0;
@@ -33,7 +37,7 @@ const filterData = (audioBuffer: AudioBuffer, maxSamples: number) => {
   const samples = [] as number[];
   let maxSample = 0;
   for (let i = windowCount; i < rawData.length; i++) {
-      if (i % sampleCount === 0) {
+      if (i % frameCount === 0) {
           const sample = Math.sqrt(rollingSum / windowCount);
           samples.push(sample);
           maxSample = Math.max(sample, maxSample);
@@ -45,6 +49,10 @@ const filterData = (audioBuffer: AudioBuffer, maxSamples: number) => {
       rollingSum += rawData[i] * rawData[i];
   }
   // Normalize to byte range
-  return samples.map(sample => Math.floor(sample / maxSample * 255));
+  return {
+    id: uuid.generate(),
+    msPerSample: Math.floor(1000 / sampleRate),
+    samples: samples.map(sample => Math.floor(sample / maxSample * 255))
+  }
 };
 

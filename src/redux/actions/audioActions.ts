@@ -1,6 +1,8 @@
+import { SampleSet } from "../../model";
+
 export interface ILoadSamples {
   readonly type: "LOAD_SAMPLES";
-  samples: number[];
+  sampleSet: SampleSet;
 }
 
 export interface IDeleteSamples {
@@ -13,4 +15,9 @@ export interface IChangeStartPin {
   startPin: number;
 }
 
-export type AudioActions = ILoadSamples | IDeleteSamples | IChangeStartPin;
+export interface IChangeSampleRate {
+  readonly type: "CHANGE_SAMPLE_RATE";
+  sampleRate: number;
+}
+
+export type AudioActions = ILoadSamples | IDeleteSamples | IChangeStartPin | IChangeSampleRate;

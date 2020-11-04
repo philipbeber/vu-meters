@@ -18,22 +18,24 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 const defaultUrl =
   "https://archive.org/download/groovelinehorns2009-10-11.mk4.flac16/groovelinehorns2009-10-11t02.mp3";
 
-const maxSamples = 300;
+const maxLength = 30; // 30 seconds
 
 function App() {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState(defaultUrl);
   const defaultStartPin = useSelector((state: AppState) => state.audio.startPin);
   const [startPin, setStartPin] = useState(defaultStartPin + "");
+  const defaultSampleRate = useSelector((state: AppState) => state.audio.sampleRate);
+  const [sampleRate, setSampleRate] = useState(defaultSampleRate + "");
   const audioDispatch = useDispatch<Dispatch<AudioActions>>();
   const { sampleSets, code } = useSelector((state: AppState) => state.audio);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleLoadFromUrl = async () => {
     setLoading(true);
-    const samples = await visualizeAudioFromUrl(url, maxSamples);
-    if (samples) {
-      audioDispatch({ type: "LOAD_SAMPLES", samples });
+    const sampleSet = await visualizeAudioFromUrl(url, maxLength, defaultSampleRate);
+    if (sampleSet) {
+      audioDispatch({ type: "LOAD_SAMPLES", sampleSet });
     }
     setLoading(false);
   };
@@ -52,9 +54,9 @@ function App() {
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const buffer = await files[i].arrayBuffer();
-        const samples = await visualizeAudioFromFile(buffer, maxSamples);
-        if (samples) {
-          audioDispatch({ type: "LOAD_SAMPLES", samples });
+        const sampleSet = await visualizeAudioFromFile(buffer, maxLength, defaultSampleRate);
+        if (sampleSet) {
+          audioDispatch({ type: "LOAD_SAMPLES", sampleSet });
         }
       }
     }
@@ -65,6 +67,13 @@ function App() {
     const startPinNum = parseInt(startPin);
     if (isFinite(startPinNum) && startPinNum >= 0 && startPinNum < 256) {
       audioDispatch({type: "CHANGE_START_PIN", startPin: startPinNum })
+    }
+  }
+
+  const saveSampleRate = () => {
+    const newSR = parseInt(sampleRate);
+    if (isFinite(newSR) && newSR > 0) {
+      audioDispatch({type: "CHANGE_SAMPLE_RATE", sampleRate: newSR })
     }
   }
 
@@ -103,11 +112,32 @@ function App() {
             onChange={handleChangeFile}
           />
         </Grid>
-        <Grid item xs={4}></Grid>
-        <Grid item xs={3}>
-          <CopyToClipboard text={code}>
-            <button>Copy code to clipboard</button>
-          </CopyToClipboard>
+        <Grid item xs={2}>
+          {/* <TextField
+            label="Start Pin"
+            value={startPin}
+            onChange={(e) => setStartPin(e.target.value)}
+            onBlur={saveStartPin}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                saveStartPin();
+              }
+            }}
+          /> */}
+        </Grid>
+        <Grid item xs={2}>
+          <TextField
+            label="Sample rate"
+            value={sampleRate}
+            onChange={(e) => setSampleRate(e.target.value)}
+            onBlur={saveSampleRate}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                saveSampleRate();
+              }
+            }}
+            style={{display: "none"}}
+          />
         </Grid>
         <Grid item xs={2}>
           <TextField
@@ -121,6 +151,11 @@ function App() {
               }
             }}
           />
+        </Grid>
+        <Grid item xs={2}>
+          <CopyToClipboard text={code}>
+            <button>Copy code to clipboard</button>
+          </CopyToClipboard>
         </Grid>
         <Grid item xs={1}>
           {loading ? <CircularProgress /> : ""}
